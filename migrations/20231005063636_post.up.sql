@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS posts (
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+ALTER TABLE posts ADD FOREIGN KEY ("author") REFERENCES users ("username");

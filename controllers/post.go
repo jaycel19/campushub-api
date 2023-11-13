@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	//"github.com/aws/aws-sdk-go/aws"
+
+	//"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-chi/chi/v5"
 	"github.com/jaycel19/campushub-api/helpers"
 	"github.com/jaycel19/campushub-api/services"
@@ -12,7 +15,6 @@ import (
 var models services.Models
 
 // GET/posts
-
 func GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	var post services.Post
 	all, err := post.GetAllPosts()
@@ -34,15 +36,42 @@ func GetPostById(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
-	var postResp services.Post
-	err := json.NewDecoder(r.Body).Decode(&postResp)
+	const maxRequestSize = 10 * 1024 * 1024 // 10mb
+	var postReq services.PostRequest
+
+	err := json.NewDecoder(r.Body).Decode(&postReq)
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		return
 	}
+
+	// TODO: UPLOAD IMG TO AWS3
+	// imageData := postReq.ImageData
+	// filename, err := uuid.NewRandom()
+	// if err != nil {
+	// 	helpers.MessageLogs.ErrorLog.Println(err)
+	// }
+	// TODO: ERROR access denied
+	// err = util.UploadImageToS3(bytes.NewReader(imageData), filename.String())
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	helpers.MessageLogs.ErrorLog.Println(err)
+	// 	// Handle error and send an appropriate response
+	// 	_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to upload image")
+	// 	return
+	// }
+
+	// imageUrl := "https://" + os.Getenv("AWS_S3_BUCKET") + ".s3.amazonaws.com/" + filename.String()
+	imageUrl := "placeholder"
+	postPayload := services.Post{
+		Author:      postReq.Author,
+		Image:       imageUrl,
+		PostContent: postReq.PostContent,
+	}
 	// TODO: Handle Error
-	_ = helpers.WriteJSON(w, http.StatusOK, postResp)
-	postCreated, err := models.Post.CreatePost(postResp)
+	_ = helpers.WriteJSON(w, http.StatusOK, postPayload)
+	postCreated, err := models.Post.CreatePost(postPayload)
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		// TODO: Handle Error

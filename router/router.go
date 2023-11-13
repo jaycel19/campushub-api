@@ -26,15 +26,15 @@ func Routes() http.Handler {
 	// AUTH ROUTES
 	router.Post("/api/v1/users/login", controllers.UserLogin)
 	router.Post("/api/v1/users", controllers.CreateUser)
+	router.Get("/api/v1/users/{username}", controllers.GetUserById)
 	// TODO: Add route for refresh tokens
+	router.Post("/api/v1/users/login/renew_token", controllers.RenewToken)
 
 	router.Group(func(auth chi.Router) {
 		auth.Use(middlewares.RequireAuth)
 
-		auth.Post("/api/v1/users/login/renew_token", controllers.RenewToken)
 		// USER ROUTES
 		auth.Get("/api/v1/users", controllers.GetAllUser)
-		auth.Get("/api/v1/users/{username}", controllers.GetUserById)
 
 		// POST ROUTES
 		auth.Get("/api/v1/posts", controllers.GetAllPosts)
@@ -42,6 +42,13 @@ func Routes() http.Handler {
 		auth.Post("/api/v1/posts", controllers.CreatePost)
 		auth.Put("/api/v1/posts/{id}", controllers.UpdatePost)
 		auth.Delete("/api/v1/posts/{id}", controllers.DeletePost)
+
+		// COMMENTS ROUTES
+		auth.Get("/api/v1/comments", controllers.GetAllComments)
+		auth.Post("/api/v1/comments", controllers.CreateComment)
+		auth.Get("/api/v1/comments/{pid}", controllers.GetCommentsByPostID)
+		auth.Put("/api/v1/comments", controllers.UpdateComment)
+		auth.Delete("/api/v1/comments/{id}", controllers.DeleteComment)
 	})
 
 	return router

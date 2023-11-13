@@ -14,6 +14,15 @@ type Post struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+type PostRequest struct {
+	ID          string    `json:"id"`
+	Author      string    `json:"author"`
+	ImageData   []byte    `json:"image"`
+	PostContent string    `json:"post_content"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 func (p *Post) GetAllPosts() ([]*Post, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()

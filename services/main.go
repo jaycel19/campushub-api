@@ -16,10 +16,13 @@ func New(dbPool *sql.DB) Models {
 }
 
 type Models struct {
-	Post         Post
-	User         User
-	JsonResponse JsonResponse
-	Session      Session
+	Post           Post
+	PostRequest    PostRequest
+	User           User
+	JsonResponse   JsonResponse
+	Session        Session
+	Comment        Comment
+	CommentRequest CommentRequest
 }
 
 type Auth struct {

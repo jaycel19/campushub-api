@@ -1,8 +1,9 @@
 DSN="host=localhost port=5432 user=root password=root dbname=campushubdb sslmode=disable timezone=UTC connect_timeout=5"
-PORT=3030
+PORT=8080
 SECRET=adsfncnvkq08ew7r098djfqew89r098d7f987qerlakdj
 DB_DOCKER_CONTAINER=campushub_db
 BINARY_NAME=campushubapi
+
 
 postgres:
 	docker run --name ${DB_DOCKER_CONTAINER} -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=root -d postgres:12-alpine

@@ -2,9 +2,14 @@ package util
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -52,6 +57,39 @@ func GenerateRefreshToken(username string, id uuid.UUID) (string, error) {
 	fmt.Println("token expiration", exp)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("SECRET")))
 	return tokenString, nil
+}
+
+// Upload post image to s3 bucket
+func UploadImageToS3(file io.ReadSeeker, filename string) error {
+	fmt.Println(os.Getenv("AWS_ACCESS_KEY_ID"))
+	fmt.Println(os.Getenv("AWS_SECRET_ACCESS_KEY"))
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("ap-southeast-1"),
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("AWS_ACCESS_KEY_ID"),
+			os.Getenv("AWS_SECRET_ACCESS_KEY"),
+			"",
+		),
+	})
+	if err != nil {
+		return err
+	}
+
+	// Create an S3 client
+	svc := s3.New(sess)
+
+	// Specify the S3 bucket and file key
+	bucket := "campushub" // Replace 'your-bucket' with your S3 bucket name
+	fileKey := filename
+
+	// Upload the file to S3
+	_, err = svc.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(fileKey),
+		Body:   file,
+		ACL:    aws.String("public-read"), // Make the uploaded image publicly accessible
+	})
+	return err
 }
 
 // VerifyToken verifies the refresh token and returns the ID (user ID or session ID) associated with it.
