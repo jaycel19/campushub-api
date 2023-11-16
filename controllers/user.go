@@ -91,10 +91,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		return
 	}
-	_ = helpers.WriteJSON(w, http.StatusOK, userResp)
 	userCreated, err := models.User.CreateUser(userResp)
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
-		_ = helpers.WriteJSON(w, http.StatusOK, userCreated)
+		return
 	}
+	_ = helpers.WriteJSON(w, http.StatusOK, userCreated)
 }

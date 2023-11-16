@@ -39,6 +39,7 @@ func Routes() http.Handler {
 		// POST ROUTES
 		auth.Get("/api/v1/posts", controllers.GetAllPosts)
 		auth.Get("/api/v1/posts/{id}", controllers.GetPostById)
+		auth.Post("/api/v1/posts/{id}/like", controllers.PostLike)
 		auth.Post("/api/v1/posts", controllers.CreatePost)
 		auth.Put("/api/v1/posts/{id}", controllers.UpdatePost)
 		auth.Delete("/api/v1/posts/{id}", controllers.DeletePost)

@@ -8,5 +8,3 @@ CREATE TABLE IF NOT EXISTS profiles (
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-
-ALTER TABLE profiles ADD FOREIGN KEY ("username") REFERENCES users ("username");

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS posts (
   "author" varchar NOT NULL,
   "image" varchar NOT NULL,
   "post_content" varchar NOT NULL,
+  "likes" integer DEFAULT 0,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

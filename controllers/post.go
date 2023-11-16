@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	//"github.com/aws/aws-sdk-go/aws"
@@ -93,6 +94,17 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		_ = helpers.WriteJSON(w, http.StatusOK, postObj)
 	}
+}
+
+func PostLike(w http.ResponseWriter, r *http.Request) {
+	var post services.Post
+	id := chi.URLParam(r, "id")
+	err := post.PostLike(id)
+	if err != nil {
+		helpers.MessageLogs.ErrorLog.Println(err)
+		return
+	}
+	fmt.Println(id)
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {

@@ -10,6 +10,7 @@ type Post struct {
 	Author      string    `json:"author"`
 	Image       string    `json:"image"`
 	PostContent string    `json:"post_content"`
+	Likes       int       `json:"likes"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -41,6 +42,7 @@ func (p *Post) GetAllPosts() ([]*Post, error) {
 			&post.Author,
 			&post.Image,
 			&post.PostContent,
+			&post.Likes,
 			&post.CreatedAt,
 			&post.UpdatedAt,
 		)
@@ -67,6 +69,7 @@ func (p *Post) GetPostById(id string) (*Post, error) {
 		&post.Author,
 		&post.Image,
 		&post.PostContent,
+		&post.Likes,
 		&post.CreatedAt,
 		&post.UpdatedAt,
 	)
@@ -105,6 +108,30 @@ func (p *Post) UpdatePost(id string, body Post) (*Post, error) {
 		return nil, err
 	}
 	return &body, nil
+}
+
+func (p *Post) PostLike(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `
+		UPDATE posts
+		SET
+			likes = likes + 1,
+			updated_at = $1
+		WHERE id=$2
+	`
+
+	_, err := db.ExecContext(
+		ctx,
+		query,
+		time.Now(),
+		id,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *Post) DeletePost(id string) error {
