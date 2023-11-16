@@ -11,7 +11,7 @@ type Profile struct {
 	Username          string    `json:"username"`
 	Age               string    `json:"age"`
 	Program           string    `json:"program"`
-	Year              int       `json:"Year"`
+	Year              string    `json:"Year"`
 	ProfileBackground string    `json:"profile_background"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
@@ -23,7 +23,7 @@ type ProfileRequest struct {
 	Username          string    `json:"username"`
 	Age               string    `json:"age"`
 	Program           string    `json:"program"`
-	Year              int       `json:"Year"`
+	Year              string    `json:"Year"`
 	ProfileBackground string    `json:"profile_background"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
@@ -138,6 +138,7 @@ func (p *Profile) ProfileChangeBackground(username string, background string) er
 	_, err := db.ExecContext(
 		ctx,
 		query,
+		background,
 		time.Now(),
 		username,
 	)
@@ -159,7 +160,7 @@ func (p *Profile) DeleteProfile(username string) error {
 	return nil
 }
 
-func (p *Profile) CreatePost(profile Profile) (*Profile, error) {
+func (p *Profile) CreateProfile(profile Profile) (*Profile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 

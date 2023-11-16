@@ -23,6 +23,7 @@ type Models struct {
 	Session        Session
 	Comment        Comment
 	CommentRequest CommentRequest
+	Profile        Profile
 }
 
 type Auth struct {

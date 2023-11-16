@@ -36,6 +36,13 @@ func Routes() http.Handler {
 		// USER ROUTES
 		auth.Get("/api/v1/users", controllers.GetAllUser)
 
+		// PROFILE ROUTEs
+		auth.Get("/api/v1/profiles", controllers.GetAllProfiles)
+		auth.Get("/api/v1/profiles/{username}", controllers.GetProfileByUser)
+		auth.Put("/api/v1/profiles/{username}", controllers.UpdateProfile)
+		auth.Post("/api/v1/profiles", controllers.CreateProfile)
+		auth.Post("/api/v1/profiles/{username}/background", controllers.ProfileChangeBackground)
+
 		// POST ROUTES
 		auth.Get("/api/v1/posts", controllers.GetAllPosts)
 		auth.Get("/api/v1/posts/{id}", controllers.GetPostById)
