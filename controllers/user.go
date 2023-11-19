@@ -30,18 +30,17 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, tokenId, err := util.GenerateAccessToken(user.Username)
+	refreshToken, tokenId, err := util.GenerateRefreshToken(user.Username)
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		return
 	}
 
-	refreshToken, err := util.GenerateRefreshToken(token, tokenId)
+	token, err := util.GenerateAccessToken(user.Username, tokenId)
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		return
 	}
-
 	// New Session
 	sessionPayload := services.Session{
 		ID:           tokenId,

@@ -42,7 +42,7 @@ func RenewToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _, err := util.GenerateAccessToken(session.Username)
+	token, err := util.GenerateAccessToken(session.Username, session.ID)
 	// TODO make exp a constant or a env variable
 	exp := time.Now().Add(time.Minute * 15).Unix()
 	if err != nil {

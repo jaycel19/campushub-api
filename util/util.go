@@ -2,12 +2,11 @@ package util
 
 import (
 	"fmt"
-	"io"
+	"mime/multipart"
 	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/golang-jwt/jwt/v5"
@@ -30,47 +29,40 @@ func CheckPassword(password string, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func GenerateAccessToken(username string) (string, uuid.UUID, error) {
+func GenerateAccessToken(username string, id uuid.UUID) (string, error) {
 	// TODO: add a token payload
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	exp := time.Now().Add(time.Minute * 15).Unix()
+	claims["id"] = id
+	claims["username"] = username
+	claims["exp"] = exp
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
+
+func GenerateRefreshToken(username string) (string, uuid.UUID, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		return "", uuid.UUID{}, err
 	}
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	exp := time.Now().Add(time.Minute * 15).Unix()
-	claims["id"] = tokenID
-	claims["username"] = username
-	claims["exp"] = exp
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
-	return tokenString, tokenID, nil
-}
-
-func GenerateRefreshToken(username string, id uuid.UUID) (string, error) {
-	// TODO: add a refreshtoken payload
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
 	exp := time.Now().Add(time.Hour * 24 * 30).Unix()
-	claims["id"] = id
+	claims["id"] = tokenID
 	claims["username"] = username
 	claims["exp"] = exp
 	fmt.Println("token expiration", exp)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("SECRET")))
-	return tokenString, nil
+	return tokenString, tokenID, nil
 }
 
-// Upload post image to s3 bucket
-func UploadImageToS3(file io.ReadSeeker, filename string) error {
-	fmt.Println(os.Getenv("AWS_ACCESS_KEY_ID"))
-	fmt.Println(os.Getenv("AWS_SECRET_ACCESS_KEY"))
+func UploadImageToS3(file multipart.File, filename string) error {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("ap-southeast-1"),
-		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("AWS_ACCESS_KEY_ID"),
-			os.Getenv("AWS_SECRET_ACCESS_KEY"),
-			"",
-		),
-	})
+		Region: aws.String("us-east-1")})
 	if err != nil {
 		return err
 	}
@@ -78,17 +70,18 @@ func UploadImageToS3(file io.ReadSeeker, filename string) error {
 	// Create an S3 client
 	svc := s3.New(sess)
 
-	// Specify the S3 bucket and file key
-	bucket := "campushub" // Replace 'your-bucket' with your S3 bucket name
-	fileKey := filename
+	// Specify the bucket and object key (filename)
+	bucket := "campushub-beta"
+	key := filename
 
-	// Upload the file to S3
+	// Upload the image to S3
 	_, err = svc.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(fileKey),
+		Key:    aws.String(key),
 		Body:   file,
-		ACL:    aws.String("public-read"), // Make the uploaded image publicly accessible
+		ACL:    aws.String("public-read"), // Make the object publicly accessible
 	})
+
 	return err
 }
 

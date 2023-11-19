@@ -4,14 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	//"github.com/aws/aws-sdk-go/aws"
 
 	//"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/jaycel19/campushub-api/helpers"
 	"github.com/jaycel19/campushub-api/services"
+	"github.com/jaycel19/campushub-api/util"
 )
 
 var models services.Models
@@ -58,47 +61,64 @@ func GetPostById(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
-	const maxRequestSize = 10 * 1024 * 1024 // 10mb
-	var postReq services.PostRequest
+	//var postReq services.PostRequest
 
-	err := json.NewDecoder(r.Body).Decode(&postReq)
+	//err := json.NewDecoder(r.Body).Decode(&postReq)
+	//if err != nil {
+	//	helpers.MessageLogs.ErrorLog.Println(err)
+	//	return
+	//}
+
+	// Parse multipart form data
+	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
+		_ = helpers.WriteJSON(w, http.StatusBadRequest, "Failed to parse form data")
 		return
 	}
 
-	// TODO: UPLOAD IMG TO AWS3
-	// imageData := postReq.ImageData
-	// filename, err := uuid.NewRandom()
-	// if err != nil {
-	// 	helpers.MessageLogs.ErrorLog.Println(err)
-	// }
-	// TODO: ERROR access denied
-	// err = util.UploadImageToS3(bytes.NewReader(imageData), filename.String())
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	helpers.MessageLogs.ErrorLog.Println(err)
-	// 	// Handle error and send an appropriate response
-	// 	_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to upload image")
-	// 	return
-	// }
-
-	// imageUrl := "https://" + os.Getenv("AWS_S3_BUCKET") + ".s3.amazonaws.com/" + filename.String()
-	imageUrl := "placeholder"
-	postPayload := services.Post{
-		Author:      postReq.Author,
-		Image:       imageUrl,
-		PostContent: postReq.PostContent,
-	}
-	// TODO: Handle Error
-	_ = helpers.WriteJSON(w, http.StatusOK, postPayload)
-	postCreated, err := models.Post.CreatePost(postPayload)
+	file, header, err := r.FormFile("image")
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
-		// TODO: Handle Error
-		_ = helpers.WriteJSON(w, http.StatusOK, postCreated)
+		_ = helpers.WriteJSON(w, http.StatusBadRequest, "Failed to retrieve image from form data")
+		return
 	}
+	defer file.Close()
+	fileExt := filepath.Ext(header.Filename)
+	// Generate a unique filename using UUID
+	fileKey, err := uuid.NewRandom()
+	filename := fileKey.String() + fileExt
+	if err != nil {
+		helpers.MessageLogs.ErrorLog.Println(err)
+		_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to generate filename")
+		return
+	}
+
+	// Upload image to AWS S3
+	err = util.UploadImageToS3(file, filename)
+	if err != nil {
+		helpers.MessageLogs.ErrorLog.Println(err)
+		_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to upload image to S3")
+		return
+	}
+
+	imageUrl := "https://campushub-beta.s3.amazonaws.com/" + filename
+	//postPayload := services.Post{
+	//	Author:      postReq.Author,
+	//	Image:       imageUrl,
+	//	PostContent: postReq.PostContent,
+	//}
+
+	// Create post in the database
+	//postCreated, err := models.Post.CreatePost(postPayload)
+	//if err != nil {
+	//	helpers.MessageLogs.ErrorLog.Println(err)
+	//	_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to create post in the database")
+	//	return
+	//}
+
+	// Send a successful response
+	_ = helpers.WriteJSON(w, http.StatusOK, imageUrl)
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {

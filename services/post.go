@@ -29,7 +29,7 @@ func (p *Post) GetPosts(limit, offset int, topPost string) ([]*Post, error) {
 	defer cancel()
 
 	// Determine the ORDER BY clause based on the topPost parameter
-	orderBy := "ORDER BY CreatedAt DESC"
+	orderBy := "ORDER BY created_at DESC"
 	if topPost == "true" {
 		orderBy = "ORDER BY Likes DESC"
 	}

@@ -31,6 +31,7 @@ func RequireAuth(next http.Handler) http.Handler {
 		}
 		session, err := models.Session.GetSessionById(tokenID)
 		if err != nil {
+			helpers.MessageLogs.ErrorLog.Println(err)
 			helpers.WriteJSON(w, http.StatusInternalServerError, helpers.Envelope{"error": "Internal Server error"})
 			return
 		}

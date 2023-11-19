@@ -52,7 +52,6 @@ func (s *Session) CreateSession(session Session) (*Session, error) {
 func (S *Session) GetSessionById(id string) (*Session, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
-
 	query := `SELECT * FROM sessions WHERE id=$1`
 
 	var session Session
