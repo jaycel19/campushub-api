@@ -7,9 +7,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	//"github.com/aws/aws-sdk-go/aws"
-
-	//"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jaycel19/campushub-api/helpers"
@@ -61,16 +58,25 @@ func GetPostById(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
-	//var postReq services.PostRequest
+	var postReq services.PostRequest
+	// Extract JSON data from the form
+	jsonBodyStr := r.FormValue("jsonBody")
+	if jsonBodyStr == "" {
+		helpers.MessageLogs.ErrorLog.Println("JSON data not found in the form")
+		_ = helpers.WriteJSON(w, http.StatusBadRequest, "JSON data not found in the form")
+		return
+	}
 
-	//err := json.NewDecoder(r.Body).Decode(&postReq)
-	//if err != nil {
-	//	helpers.MessageLogs.ErrorLog.Println(err)
-	//	return
-	//}
+	// Decode JSON data
+	err := json.Unmarshal([]byte(jsonBodyStr), &postReq)
+	if err != nil {
+		helpers.MessageLogs.ErrorLog.Println(err)
+		_ = helpers.WriteJSON(w, http.StatusBadRequest, "Failed to decode JSON data")
+		return
+	}
 
 	// Parse multipart form data
-	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
+	err = r.ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
 		_ = helpers.WriteJSON(w, http.StatusBadRequest, "Failed to parse form data")
@@ -103,22 +109,22 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	imageUrl := "https://campushub-beta.s3.amazonaws.com/" + filename
-	//postPayload := services.Post{
-	//	Author:      postReq.Author,
-	//	Image:       imageUrl,
-	//	PostContent: postReq.PostContent,
-	//}
+	postPayload := services.Post{
+		Author:      postReq.Author,
+		Image:       imageUrl,
+		PostContent: postReq.PostContent,
+	}
 
 	// Create post in the database
-	//postCreated, err := models.Post.CreatePost(postPayload)
-	//if err != nil {
-	//	helpers.MessageLogs.ErrorLog.Println(err)
-	//	_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to create post in the database")
-	//	return
-	//}
+	postCreated, err := models.Post.CreatePost(postPayload)
+	if err != nil {
+		helpers.MessageLogs.ErrorLog.Println(err)
+		_ = helpers.WriteJSON(w, http.StatusInternalServerError, "Failed to create post in the database")
+		return
+	}
 
 	// Send a successful response
-	_ = helpers.WriteJSON(w, http.StatusOK, imageUrl)
+	_ = helpers.WriteJSON(w, http.StatusOK, postCreated)
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {

@@ -9,6 +9,7 @@ type Profile struct {
 	ID                string    `json:"id"`
 	Name              string    `json:"name"`
 	Username          string    `json:"username"`
+	ProfilePic        string    `json:"profile_pic"`
 	Age               string    `json:"age"`
 	Program           string    `json:"program"`
 	Year              string    `json:"Year"`

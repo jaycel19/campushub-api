@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (uuid_generate_v4()),
   "name" varchar NOT NULL,
   "username" varchar NOT NULL,
+  "profile_pic" varchar NOT NULL DEFAULT 'https://campushub-beta.s3.amazonaws.com/default-profile.png',
   "age" varchar NOT NULL,
   "program" varchar NOT NULL,
   "year" varchar NOT NULL,

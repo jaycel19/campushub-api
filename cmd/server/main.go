@@ -25,6 +25,7 @@ var port = os.Getenv("PORT")
 
 func (app *Application) Serve() error {
 	fmt.Println("API listening on port", port)
+	fmt.Println("<<<<---CHANGE THE createdat and updated at to be sent by the client!!!!!--->>>>")
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
