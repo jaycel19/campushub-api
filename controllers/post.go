@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	//"github.com/aws/aws-sdk-go/aws"
 
@@ -16,12 +17,32 @@ import (
 var models services.Models
 
 // GET/posts
-func GetAllPosts(w http.ResponseWriter, r *http.Request) {
+func GetPosts(w http.ResponseWriter, r *http.Request) {
 	var post services.Post
-	all, err := post.GetAllPosts()
+
+	// Get the limit, offset, and topPost parameters from the query
+	limitParam := r.URL.Query().Get("limit")
+	offsetParam := r.URL.Query().Get("offset")
+	topPostParam := r.URL.Query().Get("topPost")
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil || limit <= 0 {
+		limit = 20
+	}
+
+	offset, err := strconv.Atoi(offsetParam)
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	all, err := post.GetPosts(limit, offset, topPostParam)
 	if err != nil {
 		helpers.MessageLogs.ErrorLog.Println(err)
+		// Handle the error and return an appropriate response
+		_ = helpers.WriteJSON(w, http.StatusInternalServerError, helpers.Envelope{"error": "Internal Server Error"})
+		return
 	}
+
 	_ = helpers.WriteJSON(w, http.StatusOK, helpers.Envelope{"posts": all})
 }
 

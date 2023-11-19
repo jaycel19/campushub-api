@@ -44,7 +44,7 @@ func Routes() http.Handler {
 		auth.Post("/api/v1/profiles/{username}/background", controllers.ProfileChangeBackground)
 
 		// POST ROUTES
-		auth.Get("/api/v1/posts", controllers.GetAllPosts)
+		auth.Get("/api/v1/posts", controllers.GetPosts)
 		auth.Get("/api/v1/posts/{id}", controllers.GetPostById)
 		auth.Post("/api/v1/posts/{id}/like", controllers.PostLike)
 		auth.Post("/api/v1/posts", controllers.CreatePost)

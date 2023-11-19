@@ -24,16 +24,24 @@ type PostRequest struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-func (p *Post) GetAllPosts() ([]*Post, error) {
+func (p *Post) GetPosts(limit, offset int, topPost string) ([]*Post, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select * from posts`
+	// Determine the ORDER BY clause based on the topPost parameter
+	orderBy := "ORDER BY CreatedAt DESC"
+	if topPost == "true" {
+		orderBy = "ORDER BY Likes DESC"
+	}
 
-	rows, err := db.QueryContext(ctx, query)
+	// Update the query to include the LIMIT, OFFSET, and ORDER BY clauses
+	query := `SELECT * FROM posts ` + orderBy + ` LIMIT $1 OFFSET $2`
+
+	rows, err := db.QueryContext(ctx, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
+
 	var posts []*Post
 	for rows.Next() {
 		var post Post
@@ -51,6 +59,7 @@ func (p *Post) GetAllPosts() ([]*Post, error) {
 		}
 		posts = append(posts, &post)
 	}
+
 	return posts, nil
 }
 
