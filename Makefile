@@ -3,9 +3,6 @@ PORT=8080
 SECRET=adsfncnvkq08ew7r098djfqew89r098d7f987qerlakdj
 DB_DOCKER_CONTAINER=campushub_db
 BINARY_NAME=campushubapi
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=AKIAZHO2L2OKOV2MW2MM
-AWS_SECRET_ACCESS_KEY=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
 
 
 postgres:
