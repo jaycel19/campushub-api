@@ -27,7 +27,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil || limit <= 0 {
-		limit = 20
+		limit = 10
 	}
 
 	offset, err := strconv.Atoi(offsetParam)
